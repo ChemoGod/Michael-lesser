@@ -69,14 +69,35 @@
             margin-top: 30px;
         }
         .profile-title {
-            color: #16a085;
-            font-size: 24px;
+            color: #2c3e50;
+            font-size: 26px;
             font-weight: bold;
             margin-top: 15px;
+            border-bottom: 2px solid #1abc9c;
+            padding-bottom: 5px;
+        }
+        .primary-title {
+            color: #16a085;
+            font-size: 20px;
+            margin-top: 20px;
+        }
+        .secondary-title {
+            color: #d35400;
+            font-size: 18px;
+            margin-top: 20px;
         }
         .profile-desc {
-            margin-top: 10px;
-            margin-bottom: 20px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+        .score-badge {
+            display: inline-block;
+            background: #bdc3c7;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -85,12 +106,12 @@
     <h1>Descubre tu Tipo de Química Cerebral</h1>
     <div class="intro">
         <p>Basado en el libro <strong>"The Brain Chemistry Diet"</strong> del Dr. Michael Lesser.</p>
-        <p><strong>Instrucciones:</strong> Lee cada afirmación. Marca la casilla <strong>SOLO</strong> si consideras que la frase es "generalmente cierta" sobre ti. Sé honesto/a, no hay respuestas correctas o incorrectas. Al final, presiona el botón para revelar tu perfil dominante.</p>
+        <p><strong>Instrucciones:</strong> Lee cada afirmación. Marca la casilla <strong>SOLO</strong> si consideras que la frase es "generalmente cierta" sobre ti. Al final, se revelará tu perfil dominante y tu subtipo secundario (tu mezcla personal).</p>
     </div>
 
     <form id="quiz-form">
         <div id="questions-container"></div>
-        <button type="button" onclick="calculateResults()">Ver Mis Resultados</button>
+        <button type="button" onclick="calculateResults()">Ver Mis Resultados y Subtipo</button>
     </form>
 
     <div id="result-container">
@@ -100,7 +121,6 @@
     </div>
 
     <script>
-        // Lista de 60 preguntas divididas por categorías según el libro
         const questions = [
             // ESTOICO (1-10)
             { text: "1. Todos saben que pueden contar conmigo.", category: "Estoico" },
@@ -109,8 +129,8 @@
             { text: "4. No necesito mucho en cuanto a cosas materiales.", category: "Estoico" },
             { text: "5. Soy bueno/a manejando crisis.", category: "Estoico" },
             { text: "6. No soy de quejarme.", category: "Estoico" },
-            { text: "7. Soy muy considerado/a, siempre pienso en las necesidades de los demás, a menudo antes que en las mías.", category: "Estoico" },
-            { text: "8. Soy bastante equilibrado/a: no me exalto demasiado por las cosas (sean buenas o malas).", category: "Estoico" },
+            { text: "7. Soy muy considerado/a, siempre pienso en las necesidades de los demás.", category: "Estoico" },
+            { text: "8. Soy bastante equilibrado/a: no me exalto demasiado por las cosas.", category: "Estoico" },
             { text: "9. Cuando me molesto, tiendo a sentirme deprimido/a.", category: "Estoico" },
             { text: "10. Evito el conflicto a toda costa.", category: "Estoico" },
             
@@ -175,17 +195,15 @@
             { text: "60. Haría cualquier cosa por amor.", category: "Amante" }
         ];
 
-        // Descripciones de los perfiles basados en el libro
         const profilesInfo = {
-            "Estoico": "<strong>La sal de la tierra.</strong> Eres la base que sostiene todo unido. Eres confiable, organizado/a y haces el trabajo sin quejarte. Tiendes a pensar en los demás antes que en ti mismo/a y evitas los conflictos. Tu reto (cuando estás fuera de equilibrio) es que puedes suprimir demasiado tus emociones y tender a la depresión silenciosa.",
-            "Guardián": "<strong>Precavido y meticuloso.</strong> Eres constante, enfocado/a en tu seguridad y la de tus seres queridos. Eres un/a gran planificador/a, detallista y leal. Tu reto (cuando estás fuera de equilibrio) es preocuparte en exceso, volverte demasiado rígido/a y sufrir de ansiedad o comportamientos obsesivos.",
-            "Guerrero": "<strong>Orientado a la acción.</strong> Eres directo/a, carismático/a y siempre estás en una misión. Tomas riesgos por lo que crees y no le das muchas vueltas a las cosas antes de actuar. Tu reto (cuando estás fuera de equilibrio) es que puedes volverte muy impulsivo/a, explosivo/a con tu enojo o propenso/a a buscar placer inmediato (adicciones).",
-            "Estrella": "<strong>Líder y creador.</strong> Eres apasionado/a, intenso/a, optimista y tiendes a ser el centro de atención. Combinas la intuición emocional con la lógica para hacer que las cosas sucedan. Tu reto (cuando estás fuera de equilibrio) son los cambios drásticos de humor, desde una euforia poco realista hasta una depresión muy dramática.",
-            "Soñador": "<strong>Visionario introspectivo.</strong> Eres altamente inteligente, espiritual y compasivo/a. Tienes una vida interior rica y no te importa mucho lo material. Tu reto (cuando estás fuera de equilibrio) es perderte en tu propio mundo, aislarte, sentirte alienado/a de la sociedad y ser extremadamente sensible a las críticas.",
-            "Amante": "<strong>Sociable y empático.</strong> Disfrutas la vida, eres cálido/a, afectuoso/a y tus relaciones son tu prioridad número uno. Expresas tus emociones libremente y haces sentir bien a los demás. Tu reto (cuando estás fuera de equilibrio) es una profunda dependencia de los demás, inseguridad y una fuerte tendencia a la ansiedad o el pánico."
+            "Estoico": "Eres la base que sostiene todo unido. Confiable, organizado/a y haces el trabajo sin quejarte. Evitas los conflictos.",
+            "Guardián": "Eres constante, enfocado/a en tu seguridad y la de tus seres queridos. Eres un/a gran planificador/a, detallista y leal.",
+            "Guerrero": "Eres directo/a, carismático/a y siempre estás en una misión. Tomas riesgos por lo que crees.",
+            "Estrella": "Eres apasionado/a, intenso/a, optimista y tiendes a ser el centro de atención. Combinas intuición con lógica.",
+            "Soñador": "Eres altamente inteligente, espiritual y compasivo/a. Tienes una vida interior rica y no te importa lo material.",
+            "Amante": "Disfrutas la vida, eres cálido/a, afectuoso/a y tus relaciones son tu prioridad. Expresas tus emociones libremente."
         };
 
-        // Renderizar las preguntas en el HTML
         const container = document.getElementById("questions-container");
         questions.forEach((q, index) => {
             const div = document.createElement("label");
@@ -197,41 +215,17 @@
             container.appendChild(div);
         });
 
-        // Lógica para calcular y mostrar resultados
         function calculateResults() {
-            // Inicializar contadores
-            const scores = {
-                "Estoico": 0,
-                "Guardián": 0,
-                "Guerrero": 0,
-                "Estrella": 0,
-                "Soñador": 0,
-                "Amante": 0
-            };
+            const scores = { "Estoico": 0, "Guardián": 0, "Guerrero": 0, "Estrella": 0, "Soñador": 0, "Amante": 0 };
 
-            // Contar los checkboxes marcados
             const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-            checkboxes.forEach(cb => {
-                scores[cb.value]++;
-            });
+            checkboxes.forEach(cb => { scores[cb.value]++; });
 
-            // Encontrar el puntaje máximo
-            let maxScore = 0;
-            for (const profile in scores) {
-                if (scores[profile] > maxScore) {
-                    maxScore = scores[profile];
-                }
-            }
-
-            // Identificar los perfiles ganadores (puede haber empate)
-            let dominantProfiles = [];
-            for (const profile in scores) {
-                if (scores[profile] === maxScore && maxScore > 0) {
-                    dominantProfiles.push(profile);
-                }
-            }
-
-            // Preparar el HTML de salida
+            // Ordenar los perfiles de mayor a menor puntuación
+            const sortedProfiles = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+            
+            const maxScore = scores[sortedProfiles[0]];
+            
             const resultContainer = document.getElementById("result-container");
             const scoreSummary = document.getElementById("score-summary");
             const profilesWon = document.getElementById("profiles-won");
@@ -240,29 +234,62 @@
             profilesWon.innerHTML = "";
 
             if (maxScore === 0) {
-                scoreSummary.innerHTML = "No has seleccionado ninguna afirmación. Por favor, selecciona las que te describan.";
+                scoreSummary.innerHTML = "No has seleccionado ninguna afirmación.";
                 return;
             }
 
-            let summaryText = `Has marcado un máximo de <strong>${maxScore} afirmaciones</strong> en tu categoría principal.<br><br>`;
-            if (maxScore >= 6) {
-                summaryText += "<em>¡Excelente! Alcanzaste 6 o más puntos en tu perfil, lo que significa que tu química cerebral dominante es muy clara según el libro.</em>";
-            } else {
-                summaryText += "<em>Nota: Tu puntuación máxima fue menor a 6. Aunque tienes un perfil dominante, tu personalidad es una mezcla equilibrada y no tienes extremos tan marcados.</em>";
+            // Determinar Perfiles Principales (puede haber empate en 1er lugar)
+            let primaryProfiles = [];
+            let currentScore = maxScore;
+            let index = 0;
+            
+            while(index < sortedProfiles.length && scores[sortedProfiles[index]] === maxScore) {
+                primaryProfiles.push(sortedProfiles[index]);
+                index++;
             }
-            scoreSummary.innerHTML = summaryText;
 
-            // Mostrar el o los perfiles ganadores
-            dominantProfiles.forEach(profile => {
+            // Determinar Perfiles Secundarios (Subtipos / 2do lugar)
+            let secondaryProfiles = [];
+            if (index < sortedProfiles.length && scores[sortedProfiles[index]] > 0) {
+                let secondScore = scores[sortedProfiles[index]];
+                while(index < sortedProfiles.length && scores[sortedProfiles[index]] === secondScore) {
+                    secondaryProfiles.push(sortedProfiles[index]);
+                    index++;
+                }
+            }
+
+            // Construir el título combinado (Ej: Guerrero - Soñador)
+            let combinedTitle = primaryProfiles.join(" / ");
+            if (secondaryProfiles.length > 0) {
+                combinedTitle += " - " + secondaryProfiles.join(" / ");
+            }
+
+            let summaryHtml = `<div class="profile-title">Tu Perfil Completo: ${combinedTitle}</div>`;
+            summaryHtml += `<p>El Dr. Lesser indica que si superas los 6 puntos en un tipo, tienes una química cerebral fuertemente definida. Aquí tienes el desglose:</p>`;
+            scoreSummary.innerHTML = summaryHtml;
+
+            // Mostrar el Perfil Principal
+            primaryProfiles.forEach(profile => {
                 const div = document.createElement("div");
                 div.innerHTML = `
-                    <div class="profile-title">Tu Tipo: ${profile}</div>
+                    <div class="primary-title">♦ DOMINANTE: ${profile} <span class="score-badge">${scores[profile]} pts</span></div>
                     <div class="profile-desc">${profilesInfo[profile]}</div>
                 `;
                 profilesWon.appendChild(div);
             });
+
+            // Mostrar el Perfil Secundario (Subtipo) si existe
+            if (secondaryProfiles.length > 0) {
+                secondaryProfiles.forEach(profile => {
+                    const div = document.createElement("div");
+                    div.innerHTML = `
+                        <div class="secondary-title">♢ SUBTIPO SECUNDARIO: ${profile} <span class="score-badge">${scores[profile]} pts</span></div>
+                        <div class="profile-desc"><em>Aporta matices a tu personalidad principal:</em> ${profilesInfo[profile]}</div>
+                    `;
+                    profilesWon.appendChild(div);
+                });
+            }
             
-            // Hacer scroll hacia los resultados
             resultContainer.scrollIntoView({ behavior: "smooth" });
         }
     </script>

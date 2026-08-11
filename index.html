@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: La Dieta de la Química Cerebral</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .intro {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .question-box {
+            background: #fff;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .question-box:hover {
+            background: #eef2f3;
+        }
+        input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.5);
+            cursor: pointer;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        #result-container {
+            display: none;
+            background: #e8f8f5;
+            border: 2px solid #1abc9c;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .profile-title {
+            color: #16a085;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .profile-desc {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Descubre tu Tipo de Química Cerebral</h1>
+    <div class="intro">
+        <p>Basado en el libro <strong>"The Brain Chemistry Diet"</strong> del Dr. Michael Lesser.</p>
+        <p><strong>Instrucciones:</strong> Lee cada afirmación. Marca la casilla <strong>SOLO</strong> si consideras que la frase es "generalmente cierta" sobre ti. Sé honesto/a, no hay respuestas correctas o incorrectas. Al final, presiona el botón para revelar tu perfil dominante.</p>
+    </div>
+
+    <form id="quiz-form">
+        <div id="questions-container"></div>
+        <button type="button" onclick="calculateResults()">Ver Mis Resultados</button>
+    </form>
+
+    <div id="result-container">
+        <h2>Tus Resultados</h2>
+        <p id="score-summary"></p>
+        <div id="profiles-won"></div>
+    </div>
+
+    <script>
+        // Lista de 60 preguntas divididas por categorías según el libro
+        const questions = [
+            // ESTOICO (1-10)
+            { text: "1. Todos saben que pueden contar conmigo.", category: "Estoico" },
+            { text: "2. Me cuesta decir 'no'.", category: "Estoico" },
+            { text: "3. Cuando estoy triste o enojado/a, la mayoría de las veces los demás no se dan cuenta.", category: "Estoico" },
+            { text: "4. No necesito mucho en cuanto a cosas materiales.", category: "Estoico" },
+            { text: "5. Soy bueno/a manejando crisis.", category: "Estoico" },
+            { text: "6. No soy de quejarme.", category: "Estoico" },
+            { text: "7. Soy muy considerado/a, siempre pienso en las necesidades de los demás, a menudo antes que en las mías.", category: "Estoico" },
+            { text: "8. Soy bastante equilibrado/a: no me exalto demasiado por las cosas (sean buenas o malas).", category: "Estoico" },
+            { text: "9. Cuando me molesto, tiendo a sentirme deprimido/a.", category: "Estoico" },
+            { text: "10. Evito el conflicto a toda costa.", category: "Estoico" },
+            
+            // GUARDIAN (11-20)
+            { text: "11. Me preocupa mucho la seguridad.", category: "Guardián" },
+            { text: "12. Me gusta que mi vida esté organizada en torno a una rutina regular.", category: "Guardián" },
+            { text: "13. Sé lo que está bien y lo que está mal; vivo según mis principios.", category: "Guardián" },
+            { text: "14. Mis amigos dicen que me preocupo por todo.", category: "Guardián" },
+            { text: "15. Pienso cuidadosamente en cada opción antes de tomar una decisión.", category: "Guardián" },
+            { text: "16. Soy muy cuidadoso/a con mi dinero.", category: "Guardián" },
+            { text: "17. Soy coleccionista.", category: "Guardián" },
+            { text: "18. Soy muy ordenado/a y limpio/a.", category: "Guardián" },
+            { text: "19. Definitivamente no soy alguien que se rinda fácilmente.", category: "Guardián" },
+            { text: "20. Valoro mucho la inteligencia.", category: "Guardián" },
+
+            // GUERRERO (21-30)
+            { text: "21. Me gusta ser espontáneo/a.", category: "Guerrero" },
+            { text: "22. Me gusta tomar riesgos.", category: "Guerrero" },
+            { text: "23. Puedo ser muy persuasivo/a.", category: "Guerrero" },
+            { text: "24. Sentirme bien y pasar un buen rato están en lo alto de mi lista de prioridades.", category: "Guerrero" },
+            { text: "25. Tengo un temperamento explosivo (me enojo fácilmente).", category: "Guerrero" },
+            { text: "26. Siempre hago lo correcto (lo que considero justo).", category: "Guerrero" },
+            { text: "27. Soy más de actuar que de pensar o hablar.", category: "Guerrero" },
+            { text: "28. Cuando me molesto, generalmente me enojo.", category: "Guerrero" },
+            { text: "29. Cuando tengo una misión, no dejo que nada se interponga en mi camino.", category: "Guerrero" },
+            { text: "30. Soy decidido/a.", category: "Guerrero" },
+
+            // ESTRELLA (31-40)
+            { text: "31. Soy optimista.", category: "Estrella" },
+            { text: "32. Puedo hablar por los codos (hablo muchísimo).", category: "Estrella" },
+            { text: "33. Soy muy activo/a; tengo mucha energía.", category: "Estrella" },
+            { text: "34. Es divertido estar conmigo.", category: "Estrella" },
+            { text: "35. Me gusta ser el centro de atención.", category: "Estrella" },
+            { text: "36. Si me pongo triste o enojado/a, seguro que todos a mi alrededor se enteran.", category: "Estrella" },
+            { text: "37. Soy intuitivo/a.", category: "Estrella" },
+            { text: "38. Cuando mi estado de ánimo cambia, puede hacerlo de forma muy dramática.", category: "Estrella" },
+            { text: "39. Me gusta tener un rol de liderazgo en las cosas.", category: "Estrella" },
+            { text: "40. Soy intenso/a y apasionado/a.", category: "Estrella" },
+
+            // SOÑADOR (41-50)
+            { text: "41. Soy tímido/a.", category: "Soñador" },
+            { text: "42. Soy bueno/a en lo que hago.", category: "Soñador" },
+            { text: "43. Tengo estándares morales altos.", category: "Soñador" },
+            { text: "44. Me mantengo reservado/a (aislado/a).", category: "Soñador" },
+            { text: "45. Las cosas materiales no significan nada para mí.", category: "Soñador" },
+            { text: "46. Mis sentimientos se hieren fácilmente.", category: "Soñador" },
+            { text: "47. Siento que mucha gente simplemente no me entiende.", category: "Soñador" },
+            { text: "48. No soporto el enojo/la ira.", category: "Soñador" },
+            { text: "49. La espiritualidad es importante para mí.", category: "Soñador" },
+            { text: "50. Soy más de pensar que de actuar.", category: "Soñador" },
+
+            // AMANTE (51-60)
+            { text: "51. Soy una persona extrovertida.", category: "Amante" },
+            { text: "52. Me gusta vivir la vida al máximo.", category: "Amante" },
+            { text: "53. El sexo es uno de los grandes placeres de la vida.", category: "Amante" },
+            { text: "54. Puedo ser inconstante (caprichoso/a o voluble).", category: "Amante" },
+            { text: "55. Estoy 'en contacto' con mis emociones.", category: "Amante" },
+            { text: "56. Disfruto coquetear.", category: "Amante" },
+            { text: "57. Cuando me molesto, tiendo a sentir ansiedad.", category: "Amante" },
+            { text: "58. Las demás personas tienden a sentirse atraídas hacia mí.", category: "Amante" },
+            { text: "59. Soy una persona sociable; de esas que 'necesitan estar con gente'.", category: "Amante" },
+            { text: "60. Haría cualquier cosa por amor.", category: "Amante" }
+        ];
+
+        // Descripciones de los perfiles basados en el libro
+        const profilesInfo = {
+            "Estoico": "<strong>La sal de la tierra.</strong> Eres la base que sostiene todo unido. Eres confiable, organizado/a y haces el trabajo sin quejarte. Tiendes a pensar en los demás antes que en ti mismo/a y evitas los conflictos. Tu reto (cuando estás fuera de equilibrio) es que puedes suprimir demasiado tus emociones y tender a la depresión silenciosa.",
+            "Guardián": "<strong>Precavido y meticuloso.</strong> Eres constante, enfocado/a en tu seguridad y la de tus seres queridos. Eres un/a gran planificador/a, detallista y leal. Tu reto (cuando estás fuera de equilibrio) es preocuparte en exceso, volverte demasiado rígido/a y sufrir de ansiedad o comportamientos obsesivos.",
+            "Guerrero": "<strong>Orientado a la acción.</strong> Eres directo/a, carismático/a y siempre estás en una misión. Tomas riesgos por lo que crees y no le das muchas vueltas a las cosas antes de actuar. Tu reto (cuando estás fuera de equilibrio) es que puedes volverte muy impulsivo/a, explosivo/a con tu enojo o propenso/a a buscar placer inmediato (adicciones).",
+            "Estrella": "<strong>Líder y creador.</strong> Eres apasionado/a, intenso/a, optimista y tiendes a ser el centro de atención. Combinas la intuición emocional con la lógica para hacer que las cosas sucedan. Tu reto (cuando estás fuera de equilibrio) son los cambios drásticos de humor, desde una euforia poco realista hasta una depresión muy dramática.",
+            "Soñador": "<strong>Visionario introspectivo.</strong> Eres altamente inteligente, espiritual y compasivo/a. Tienes una vida interior rica y no te importa mucho lo material. Tu reto (cuando estás fuera de equilibrio) es perderte en tu propio mundo, aislarte, sentirte alienado/a de la sociedad y ser extremadamente sensible a las críticas.",
+            "Amante": "<strong>Sociable y empático.</strong> Disfrutas la vida, eres cálido/a, afectuoso/a y tus relaciones son tu prioridad número uno. Expresas tus emociones libremente y haces sentir bien a los demás. Tu reto (cuando estás fuera de equilibrio) es una profunda dependencia de los demás, inseguridad y una fuerte tendencia a la ansiedad o el pánico."
+        };
+
+        // Renderizar las preguntas en el HTML
+        const container = document.getElementById("questions-container");
+        questions.forEach((q, index) => {
+            const div = document.createElement("label");
+            div.className = "question-box";
+            div.innerHTML = `
+                <input type="checkbox" name="q${index}" value="${q.category}">
+                <span>${q.text}</span>
+            `;
+            container.appendChild(div);
+        });
+
+        // Lógica para calcular y mostrar resultados
+        function calculateResults() {
+            // Inicializar contadores
+            const scores = {
+                "Estoico": 0,
+                "Guardián": 0,
+                "Guerrero": 0,
+                "Estrella": 0,
+                "Soñador": 0,
+                "Amante": 0
+            };
+
+            // Contar los checkboxes marcados
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => {
+                scores[cb.value]++;
+            });
+
+            // Encontrar el puntaje máximo
+            let maxScore = 0;
+            for (const profile in scores) {
+                if (scores[profile] > maxScore) {
+                    maxScore = scores[profile];
+                }
+            }
+
+            // Identificar los perfiles ganadores (puede haber empate)
+            let dominantProfiles = [];
+            for (const profile in scores) {
+                if (scores[profile] === maxScore && maxScore > 0) {
+                    dominantProfiles.push(profile);
+                }
+            }
+
+            // Preparar el HTML de salida
+            const resultContainer = document.getElementById("result-container");
+            const scoreSummary = document.getElementById("score-summary");
+            const profilesWon = document.getElementById("profiles-won");
+            
+            resultContainer.style.display = "block";
+            profilesWon.innerHTML = "";
+
+            if (maxScore === 0) {
+                scoreSummary.innerHTML = "No has seleccionado ninguna afirmación. Por favor, selecciona las que te describan.";
+                return;
+            }
+
+            let summaryText = `Has marcado un máximo de <strong>${maxScore} afirmaciones</strong> en tu categoría principal.<br><br>`;
+            if (maxScore >= 6) {
+                summaryText += "<em>¡Excelente! Alcanzaste 6 o más puntos en tu perfil, lo que significa que tu química cerebral dominante es muy clara según el libro.</em>";
+            } else {
+                summaryText += "<em>Nota: Tu puntuación máxima fue menor a 6. Aunque tienes un perfil dominante, tu personalidad es una mezcla equilibrada y no tienes extremos tan marcados.</em>";
+            }
+            scoreSummary.innerHTML = summaryText;
+
+            // Mostrar el o los perfiles ganadores
+            dominantProfiles.forEach(profile => {
+                const div = document.createElement("div");
+                div.innerHTML = `
+                    <div class="profile-title">Tu Tipo: ${profile}</div>
+                    <div class="profile-desc">${profilesInfo[profile]}</div>
+                `;
+                profilesWon.appendChild(div);
+            });
+            
+            // Hacer scroll hacia los resultados
+            resultContainer.scrollIntoView({ behavior: "smooth" });
+        }
+    </script>
+</body>
+</html>
